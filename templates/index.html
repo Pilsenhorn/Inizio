@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INIZIO</title>
+</head>
+<body>
+    <input type="text" id="query" placeholder="Hledat...">
+    <button onclick="search()">Hledat</button>
+    <script> 
+        function search() {
+            const query = document.getElementById('query').value
+            fetch(`/search?q=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    results = data.results
+                    console.log(results)
+                })
+                .catch(error => console.error('Chyba při hledání:', error))
+        }
+    </script>
+</body>
+</html>
