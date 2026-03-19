@@ -18,9 +18,10 @@
             fetch(`/search?q=${query}`)
                 .then(response => response.json())
                 .then(data => {
-                    const results = data
+                    console.log('Výsledky hledání:', data)
+                    const results = data.results || data
                     const container = document.getElementById('results')
-                    container.innerHTML = ''
+                    container.innerHTML = ""
 
                     results.forEach(item => {
                         container.innerHTML += `
@@ -30,6 +31,7 @@
                                         ${item.title}
                                 </a>
                             </h3>
+                            <p>${item.snippet}</p>
                         </div>
                     `
                     })
