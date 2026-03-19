@@ -13,7 +13,7 @@ def get_google_results(query: str):
     print(data)
     results = data.get("organic_results", [])
     clean_results = []
-    for item in results[:11]: # limit na 10 výsledků
+    for item in results[:10]: 
         clean_results.append({
             "title": item.get("title"),
             "link": item.get("link"),
