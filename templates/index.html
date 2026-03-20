@@ -6,38 +6,68 @@
     <title>INIZIO</title>
 </head>
 <body>
-    <input type="text" id="query" placeholder="Hledat...">
-    <button onclick="search()">Hledat</button>
+    <form id="searchForm">
+        <input type="text" id="query" placeholder="Hledat...">
+        <button type="submit">Hledat</button>
+    </form>
 
     <div id="results">
 
     </div>
     <script> 
+        const form = document.getElementById("searchForm")
+        const input = document.getElementById("query")
+        const container = document.getElementById("results")
+
+        form.addEventListener("submit", function (e) {
+            e.preventDefault()
+            search()
+        })
+
         function search() {
-            const query = document.getElementById('query').value
+            const query = input.value.trim()
+
+            //  VALIDACE
+            if (!query) {
+                container.innerHTML = "<p>Zadejte hledaný výraz.</p>"
+                return
+            }
+
+            //  LOADING 
+            container.innerHTML = "<p>Načítám výsledky...</p>"
+
             fetch(`/search?q=${query}`)
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Výsledky hledání:', data)
                     const results = data.results || data
-                    const container = document.getElementById('results')
+
+                    //  EMPTY
+                    if (!results.length) {
+                        container.innerHTML = "<p>Nebyly nalezeny žádné výsledky.</p>"
+                        return
+                    }
+
+                    //  RESET
                     container.innerHTML = ""
 
+                    //  RENDER
                     results.forEach(item => {
                         container.innerHTML += `
-                        <div>
-                            <h3>
-                                <a href="${item.link}" target="_blank">
+                            <div>
+                                <h3>
+                                    <a href="${item.link}" target="_blank">
                                         ${item.title}
-                                </a>
-                            </h3>
-                            <p>${item.snippet}</p>
-                        </div>
-                    `
+                                    </a>
+                                </h3>
+                                <p>${item.snippet}</p>
+                            </div>
+                        `
                     })
-
                 })
-                .catch(error => console.error('Chyba při hledání:', error))
+                .catch(() => {
+                    //  ERROR
+                    container.innerHTML = "<p>Nepodařilo se načíst výsledky. Zkuste to znovu.</p>"
+                })
         }
     </script>
 </body>
