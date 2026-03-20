@@ -18,6 +18,9 @@
         const form = document.getElementById("searchForm")
         const input = document.getElementById("query")
         const container = document.getElementById("results")
+        const button = form.querySelector("button")
+
+        let currentRequestId = 0
 
         form.addEventListener("submit", function (e) {
             e.preventDefault()
@@ -27,46 +30,56 @@
         function search() {
             const query = input.value.trim()
 
-            //  VALIDACE
             if (!query) {
                 container.innerHTML = "<p>Zadejte hledaný výraz.</p>"
                 return
             }
 
-            //  LOADING 
+            const requestId = ++currentRequestId
+
             container.innerHTML = "<p>Načítám výsledky...</p>"
+            button.disabled = true
 
             fetch(`/search?q=${query}`)
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Server error")
+                    }
+                    return response.json()
+                })
                 .then(data => {
+                    if (requestId !== currentRequestId) 
+                        return
+
                     const results = data.results || data
 
-                    //  EMPTY
                     if (!results.length) {
                         container.innerHTML = "<p>Nebyly nalezeny žádné výsledky.</p>"
                         return
                     }
 
-                    //  RESET
-                    container.innerHTML = ""
+                    const html = results.map(item => `
+                        <div>
+                            <h3>
+                                <a href="${item.link}" target="_blank">
+                                    ${item.title}
+                                </a>
+                            </h3>
+                            <p>${item.snippet}</p>
+                        </div>
+                    `).join("")
 
-                    //  RENDER
-                    results.forEach(item => {
-                        container.innerHTML += `
-                            <div>
-                                <h3>
-                                    <a href="${item.link}" target="_blank">
-                                        ${item.title}
-                                    </a>
-                                </h3>
-                                <p>${item.snippet}</p>
-                            </div>
-                        `
-                    })
+                    container.innerHTML = html
                 })
                 .catch(() => {
-                    //  ERROR
-                    container.innerHTML = "<p>Nepodařilo se načíst výsledky. Zkuste to znovu.</p>"
+                    if (requestId !== currentRequestId) 
+                        return
+
+                    container.innerHTML = "<p>Nepodařilo se načíst výsledky.</p>"
+                })
+                .finally(() => {
+                    button.disabled = false
+                    input.focus()
                 })
         }
     </script>
