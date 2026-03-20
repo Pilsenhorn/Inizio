@@ -28,6 +28,10 @@
         })
 
         function search() {
+            if (button.disabled) {
+                return
+            }
+
             const query = input.value.trim()
 
             if (!query) {
@@ -48,11 +52,9 @@
                     return response.json()
                 })
                 .then(data => {
-                    if (requestId !== currentRequestId) 
-                        return
+                    if (requestId !== currentRequestId) return
 
                     const results = data.results || data
-
                     if (!results.length) {
                         container.innerHTML = "<p>Nebyly nalezeny žádné výsledky.</p>"
                         return
@@ -69,7 +71,10 @@
                         </div>
                     `).join("")
 
-                    container.innerHTML = html
+                    container.innerHTML = `
+                        <p>Výsledky pro: <strong>${query}</strong></p>
+                        ${html}
+                        `
                 })
                 .catch(() => {
                     if (requestId !== currentRequestId) 
